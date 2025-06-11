@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Diario - Seguimiento de Hábitos</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/auth.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header text-center">
+            <div class="header-content protected-header">
+                <div>
+                    <h1 class="header-title">
+                        <i class="fas fa-calendar-check text-blue"></i>
+                        Registro Diario
+                    </h1>
+                    <p class="header-date" id="currentDate"></p>
+                </div>
+                <!-- El menú de usuario se insertará aquí dinámicamente -->
+            </div>
+        </header>
+
+        <!-- Progress Summary -->
+        <div class="card progress-summary">
+            <div class="card-content">
+                <div class="summary-content">
+                    <div class="summary-info">
+                        <h3 class="summary-title">Progreso del Día</h3>
+                        <p class="summary-description" id="progressDescription">0 de 0 hábitos completados</p>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="summary-percentage" id="completionPercentage">0%</div>
+                        <div class="summary-badge" id="completionBadge">Puedes mejorar</div>
+                    </div>
+                </div>
+                <div class="progress-bar large">
+                    <div class="progress-fill" id="dailyProgress"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Habits List -->
+        <div id="habitsContainer" class="habits-daily-list">
+            <!-- Los hábitos se cargarán aquí -->
+        </div>
+
+        <!-- Notes Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Notas del Día</h2>
+                <p class="card-description">Reflexiona sobre tu día y agrega cualquier observación</p>
+            </div>
+            <div class="card-content">
+                <textarea 
+                    id="dailyNotes" 
+                    class="form-textarea" 
+                    placeholder="¿Cómo te sentiste hoy? ¿Qué te ayudó o dificultó completar tus hábitos?"
+                    rows="4"
+                ></textarea>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-center">
+            <button class="btn btn-primary btn-large" onclick="saveDailyLog()">
+                <i class="fas fa-save"></i>
+                Guardar Registro del Día
+            </button>
+        </div>
+
+        <!-- Motivational Message -->
+        <div id="motivationalMessage" class="card motivational-card" style="display: none;">
+            <div class="card-content text-center">
+                <div class="motivational-content">
+                    <i class="fas fa-award motivational-icon"></i>
+                    <span class="motivational-title">¡Excelente trabajo hoy!</span>
+                </div>
+                <p class="motivational-text" id="motivationalText">
+                    Has completado la mayoría de tus hábitos. ¡Sigue así!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="assets/js/daily-log.js"></script>
+</body>
+</html>

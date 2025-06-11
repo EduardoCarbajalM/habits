@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Iniciar Sesión</title>
+</head>
+<body>
+    <h1>Iniciar Sesión</h1>
+    <form id="loginForm">
+        <input type="email" name="email" placeholder="Correo electrónico" required />
+        <input type="password" name="password" placeholder="Contraseña" required />
+        <button type="submit">Entrar</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const data = new URLSearchParams(new FormData(form));
+
+            try {
+                const res = await fetch('auth.php', {
+                    method: 'POST',
+                    body: data,
+                });
+                const json = await res.json();
+
+                if (res.ok && json.success) {
+                    // Login exitoso, redirige
+                    window.location.href = 'index.html';
+                } else {
+                    alert(json.error || 'Usuario o contraseña incorrectos');
+                }
+            } catch (error) {
+                alert('Error de conexión al servidor');
+            }
+        });
+    </script>
+</body>
+</html>

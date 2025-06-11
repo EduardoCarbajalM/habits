@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Hábito - Seguimiento de Hábitos</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/auth.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content protected-header">
+                <div class="header-with-back">
+                    <button class="btn-back" onclick="window.location.href='index.html'">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="header-info">
+                        <h1 class="header-title" id="habitName">
+                            Cargando...
+                            <button class="btn-icon">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </h1>
+                        <p class="header-description" id="habitDescription"></p>
+                    </div>
+                </div>
+                <!-- El menú de usuario se insertará aquí dinámicamente -->
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card stat-orange">
+                <div class="stat-header">
+                    <span class="stat-label">Racha Actual</span>
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="stat-value" id="currentStreak">0</div>
+                <div class="stat-subtitle">días consecutivos</div>
+            </div>
+
+            <div class="stat-card stat-purple">
+                <div class="stat-header">
+                    <span class="stat-label">Mejor Racha</span>
+                    <i class="fas fa-target"></i>
+                </div>
+                <div class="stat-value" id="bestStreak">0</div>
+                <div class="stat-subtitle">récord personal</div>
+            </div>
+
+            <div class="stat-card stat-green">
+                <div class="stat-header">
+                    <span class="stat-label">Tasa de Éxito</span>
+                    <i class="fas fa-trending-up"></i>
+                </div>
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="successProgress"></div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-blue">
+                <div class="stat-header">
+                    <span class="stat-label">Días Totales</span>
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="stat-value" id="totalDays">0</div>
+                <div class="stat-subtitle">días registrados</div>
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <!-- Registro de Hoy -->
+            <div class="today-log">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Registro de Hoy</h2>
+                        <p class="card-description" id="todayDate"></p>
+                    </div>
+                    <div class="card-content">
+                        <div id="todayProgress" class="today-progress">
+                            <!-- El contenido se cargará dinámicamente -->
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="todayNotes" class="form-label">Notas del día (opcional)</label>
+                            <textarea 
+                                id="todayNotes" 
+                                class="form-textarea" 
+                                placeholder="¿Cómo te fue hoy? Agrega tus observaciones..."
+                                rows="3"
+                            ></textarea>
+                        </div>
+
+                        <button class="btn btn-primary btn-full" onclick="saveTodayProgress()">
+                            <i class="fas fa-save"></i>
+                            Guardar Progreso
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Progreso -->
+            <div class="progress-chart">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Progreso Histórico</h2>
+                        <p class="card-description">Últimos 7 días de seguimiento</p>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="progressChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Registros -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Historial de Registros</h2>
+                <p class="card-description">Revisa y edita tus registros anteriores</p>
+            </div>
+            <div class="card-content">
+                <div id="recordsHistory" class="records-list">
+                    <!-- Los registros se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="assets/js/habit-detail.js"></script>
+</body>
+</html>

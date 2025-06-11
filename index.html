@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Seguimiento de Hábitos</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content protected-header">
+                <div class="header-info">
+                    <h1 class="header-title">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard de Hábitos
+                    </h1>
+                    <p class="header-date" id="currentDate"></p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='add-habit.html'">
+                        <i class="fas fa-plus"></i>
+                        Nuevo Hábito
+                    </button>
+                    <!-- El menú de usuario se insertará aquí dinámicamente -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Resto del contenido igual... -->
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card stat-blue">
+                <div class="stat-header">
+                    <span class="stat-label">Hábitos Totales</span>
+                    <i class="fas fa-target"></i>
+                </div>
+                <div class="stat-value" id="totalHabits">0</div>
+            </div>
+
+            <div class="stat-card stat-green">
+                <div class="stat-header">
+                    <span class="stat-label">Completados Hoy</span>
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value" id="completedToday">0/0</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="completionProgress"></div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-purple">
+                <div class="stat-header">
+                    <span class="stat-label">Mejor Racha</span>
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="stat-value" id="bestStreak">0 días</div>
+            </div>
+
+            <div class="stat-card stat-orange">
+                <div class="stat-header">
+                    <span class="stat-label">Progreso Semanal</span>
+                    <i class="fas fa-trending-up"></i>
+                </div>
+                <div class="stat-value" id="weeklyProgress">0%</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Hábitos de Hoy -->
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Hábitos de Hoy</h2>
+                        <p class="card-description">Progreso de tus hábitos para hoy</p>
+                    </div>
+                    <div class="card-content">
+                        <div id="habitsContainer" class="habits-list">
+                            <!-- Los hábitos se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendario y Gráficos -->
+            <div class="sidebar">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-calendar"></i>
+                            Calendario
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="calendar" id="calendar">
+                            <!-- El calendario se generará aquí -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Progreso Semanal</h3>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="weeklyChart" width="300" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

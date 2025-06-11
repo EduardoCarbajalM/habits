@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Registro</title>
+</head>
+<body>
+    <h1>Registro</h1>
+    <form id="registerForm">
+        <input type="email" name="email" placeholder="Correo electrónico" required />
+        <input type="password" name="password" placeholder="Contraseña" required minlength="8" />
+        <button type="submit">Registrar</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const data = new URLSearchParams(new FormData(form));
+
+            try {
+                const res = await fetch('registro.php', {
+                    method: 'POST',
+                    body: data,
+                });
+                const json = await res.json();
+
+                if (res.ok && json.success) {
+                    alert('Usuario registrado con éxito');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(json.error || 'Error en el registro');
+                }
+            } catch (error) {
+                alert('Registrado con éxito! :)');
+            }
+        });
+    </script>
+</body>
+</html>
