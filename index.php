@@ -28,7 +28,7 @@ if (!isset($_SESSION['email'])) {
                     <p class="header-date" id="currentDate"></p>
                 </div>
                 <div class="header-actions">
-                    <button class="btn btn-primary" onclick="window.location.href='add-habit.html'">
+                    <button class="btn btn-primary" onclick="window.location.href='add-habit.php'">
                         <i class="fas fa-plus"></i>
                         Nuevo Hábito
                     </button>
