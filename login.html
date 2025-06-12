@@ -2,39 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title>Iniciar Sesión</title>
+    <title>Login</title>
 </head>
 <body>
-    <h1>Iniciar Sesión</h1>
     <form id="loginForm">
-        <input type="email" name="email" placeholder="Correo electrónico" required />
-        <input type="password" name="password" placeholder="Contraseña" required />
+        <input type="email" name="email" placeholder="Correo" required /><br />
+        <input type="password" name="password" placeholder="Contraseña" required /><br />
         <button type="submit">Entrar</button>
     </form>
 
     <script>
-        const form = document.getElementById('loginForm');
-        form.addEventListener('submit', async e => {
-            e.preventDefault();
-            const data = new URLSearchParams(new FormData(form));
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            try {
-                const res = await fetch('auth.php', {
-                    method: 'POST',
-                    body: data,
-                });
-                const json = await res.json();
+        const form = e.target;
+        const formData = new URLSearchParams(new FormData(form));
 
-                if (res.ok && json.success) {
-                    // Login exitoso, redirige
-                    window.location.href = 'index.html';
-                } else {
-                    alert(json.error || 'Usuario o contraseña incorrectos');
-                }
-            } catch (error) {
-                alert('Error de conexión al servidor');
-            }
+        const res = await fetch('auth.php', {
+            method: 'POST',
+            body: formData,
         });
+
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.href = 'index.php';
+        } else {
+            alert(data.message);
+        }
+    });
     </script>
 </body>
 </html>

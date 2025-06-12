@@ -1,4 +1,5 @@
 <?php
+session_start();
 require 'vendor/autoload.php';
 
 use Aws\DynamoDb\DynamoDbClient;
@@ -6,51 +7,47 @@ use Aws\DynamoDb\Exception\DynamoDbException;
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Método no permitido']);
-    exit;
-}
-
 $client = new DynamoDbClient([
-    'region' => 'us-west-2',
+    'region'  => 'us-west-2',
     'version' => 'latest',
-    'endpoint' => 'http://localhost:8000',
+    'endpoint' => 'http://localhost:8000'
 ]);
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+    exit();
+}
 
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 
 if (!$email || !$password) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Completa todos los campos']);
-    exit;
+    echo json_encode(['success' => false, 'message' => 'Faltan datos']);
+    exit();
 }
 
 try {
-    $response = $client->getItem([
+    $result = $client->getItem([
         'TableName' => 'Usuarios',
-        'Key' => [
-            'email' => ['S' => $email]
-        ]
+        'Key' => ['email' => ['S' => $email]]
     ]);
-
-    if (!isset($response['Item'])) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Usuario o contraseña incorrectos']);
-        exit;
+    
+    if (!isset($result['Item'])) {
+        echo json_encode(['success' => false, 'message' => 'Usuario no encontrado']);
+        exit();
     }
 
-    $passwordStored = $response['Item']['password']['S'];
+    $storedPassword = $result['Item']['password']['S'];
 
-    if ($password === $passwordStored) {
-        echo json_encode(['success' => true]);
+    if ($password === $storedPassword) {
+        $_SESSION['email'] = $email;
+        echo json_encode(['success' => true, 'message' => 'Login exitoso']);
+        exit();
     } else {
-        http_response_code(401);
-        echo json_encode(['error' => 'Usuario o contraseña incorrectos']);
+        echo json_encode(['success' => false, 'message' => 'Contraseña incorrecta']);
+        exit();
     }
-
 } catch (DynamoDbException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error del servidor: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Error en DB: ' . $e->getMessage()]);
+    exit();
 }
