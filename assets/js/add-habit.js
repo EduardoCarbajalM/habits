@@ -1,166 +1,94 @@
-class AddHabitForm {
-  constructor() {
-    this.form = document.getElementById("habitForm")
-    this.habitType = document.getElementById("habitType")
-    this.numericConfig = document.getElementById("numericConfig")
-    this.reminderCheckbox = document.getElementById("habitReminder")
-    this.reminderTime = document.getElementById("reminderTime")
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('habitForm');
+    const habitSelect = document.getElementById('habitSelect');
+    const habitName = document.getElementById('habitName');
+    const habitType = document.getElementById('habitType');
+    const numericConfig = document.getElementById('numericConfig');
+    const reminderToggle = document.getElementById('habitReminder');
+    const reminderTime = document.getElementById('reminderTime');
+    const loadingSpinner = document.getElementById('loadingSpinner');
 
-    this.init()
-  }
+    // Mostrar/ocultar configuración numérica
+    habitType.addEventListener('change', () => {
+        numericConfig.style.display = habitType.value === 'numeric' ? 'block' : 'none';
+    });
 
-  init() {
-    this.setupEventListeners()
-    this.updateTypeHelp()
-  }
+    // Mostrar/ocultar recordatorio
+    reminderToggle.addEventListener('change', () => {
+        reminderTime.style.display = reminderToggle.checked ? 'block' : 'none';
+    });
 
-  setupEventListeners() {
-    // Cambio de tipo de hábito
-    this.habitType.addEventListener("change", () => {
-      this.toggleNumericConfig()
-      this.updateTypeHelp()
-    })
+    // Manejar selección de hábito
+    habitSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            // Habilitar campos para hábito personalizado
+            habitName.disabled = false;
+            habitType.disabled = false;
+            habitName.value = '';
+            habitType.value = '';
+            numericConfig.style.display = 'none';
+        } else if (this.value) {
+            // Autocompletar con hábito seleccionado
+            const selectedOption = this.options[this.selectedIndex];
+            habitName.value = selectedOption.text;
+            habitName.disabled = true;
+            habitType.value = selectedOption.dataset.type;
+            habitType.disabled = true;
+            
+            if (selectedOption.dataset.type === 'numeric') {
+                numericConfig.style.display = 'block';
+                document.getElementById('habitTarget').value = selectedOption.dataset.target || '';
+                document.getElementById('habitUnit').value = selectedOption.dataset.unit || '';
+            } else {
+                numericConfig.style.display = 'none';
+            }
+        }
+    });
 
-    // Toggle de recordatorio
-    this.reminderCheckbox.addEventListener("change", () => {
-      this.toggleReminderTime()
-    })
+    // Enviar formulario
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loadingSpinner.style.display = 'flex';
 
-    // Envío del formulario
-    this.form.addEventListener("submit", (e) => {
-      this.handleSubmit(e)
-    })
-  }
+        const isCustom = habitSelect.value === 'custom';
+        const formData = {
+            habitId: isCustom ? null : habitSelect.value,
+            habitName: habitName.value.trim(),
+            habitDescription: document.getElementById('habitDescription').value.trim(),
+            habitType: habitType.value,
+            habitTarget: document.getElementById('habitTarget')?.value || null,
+            habitUnit: document.getElementById('habitUnit')?.value || null,
+            reminderTimeInput: document.getElementById('reminderTimeInput')?.value || null,
+            isCustom: isCustom
+        };
 
-  toggleNumericConfig() {
-    const isNumeric = this.habitType.value === "numeric"
-    this.numericConfig.style.display = isNumeric ? "block" : "none"
+        try {
+            const response = await fetch('save_habit.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
 
-    // Hacer campos requeridos o no según el tipo
-    const targetInput = document.getElementById("habitTarget")
-    const unitInput = document.getElementById("habitUnit")
+            const data = await response.json();
 
-    if (isNumeric) {
-      targetInput.required = true
-      unitInput.required = true
-    } else {
-      targetInput.required = false
-      unitInput.required = false
-      targetInput.value = ""
-      unitInput.value = ""
+            if (data.success) {
+                window.location.href = 'index.php';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('Error de conexión: ' + error.message);
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    });
+
+    // Generar UUID para hábitos personalizados
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
-  }
-
-  toggleReminderTime() {
-    const showTime = this.reminderCheckbox.checked
-    this.reminderTime.style.display = showTime ? "block" : "none"
-
-    const timeInput = document.getElementById("reminderTimeInput")
-    timeInput.required = showTime
-
-    if (!showTime) {
-      timeInput.value = ""
-    }
-  }
-
-  updateTypeHelp() {
-    const helpElement = document.getElementById("typeHelp")
-    const selectedType = this.habitType.value
-
-    let helpText = "Selecciona un tipo para ver más información"
-
-    if (selectedType === "boolean") {
-      helpText = "Perfecto para hábitos que se completan o no (ej: meditar, hacer ejercicio)"
-    } else if (selectedType === "numeric") {
-      helpText = "Ideal para hábitos con cantidad específica (ej: beber 8 vasos de agua)"
-    }
-
-    helpElement.textContent = helpText
-  }
-
-  validateForm(formData) {
-    const errors = []
-
-    if (!formData.habitName.trim()) {
-      errors.push("El nombre del hábito es requerido")
-    }
-
-    if (!formData.habitType) {
-      errors.push("Debes seleccionar un tipo de hábito")
-    }
-
-    if (formData.habitType === "numeric") {
-      if (!formData.habitTarget || formData.habitTarget <= 0) {
-        errors.push("La meta diaria debe ser mayor a 0")
-      }
-      if (!formData.habitUnit.trim()) {
-        errors.push("La unidad es requerida para hábitos numéricos")
-      }
-    }
-
-    if (formData.habitReminder && !formData.reminderTimeInput) {
-      errors.push("Debes especificar la hora del recordatorio")
-    }
-
-    return errors
-  }
-
-  async handleSubmit(e) {
-    e.preventDefault()
-
-    try {
-      window.Utils.showLoading()
-
-      // Recopilar datos del formulario
-      const formData = new FormData(this.form)
-      const habitData = {
-        id: window.Utils.generateId(),
-        name: formData.get("habitName").trim(),
-        description: formData.get("habitDescription").trim(),
-        type: formData.get("habitType"),
-        target: formData.get("habitTarget") ? Number.parseInt(formData.get("habitTarget")) : null,
-        unit: formData.get("habitUnit") ? formData.get("habitUnit").trim() : null,
-        reminder: formData.get("habitReminder") === "on",
-        reminderTime: formData.get("reminderTimeInput") || null,
-        createdAt: new Date().toISOString(),
-        streak: 0,
-        bestStreak: 0,
-        totalDays: 0,
-      }
-
-      // Validar datos
-      const errors = this.validateForm(habitData)
-      if (errors.length > 0) {
-        window.Utils.showNotification(errors[0], "error")
-        return
-      }
-
-      // Enviar al servidor
-      const response = await window.Utils.makeRequest("create-habit.php", {
-        method: "POST",
-        body: JSON.stringify(habitData),
-      })
-
-      if (response.success) {
-        window.Utils.showNotification("¡Hábito creado exitosamente!")
-
-        // Redirigir al dashboard después de un breve delay
-        setTimeout(() => {
-          window.location.href = "index.html"
-        }, 1500)
-      } else {
-        throw new Error(response.message || "Error creando el hábito")
-      }
-    } catch (error) {
-      console.error("Error creando hábito:", error)
-      window.Utils.showNotification(error.message || "Error creando el hábito", "error")
-    } finally {
-      window.Utils.hideLoading()
-    }
-  }
-}
-
-// Inicializar formulario
-document.addEventListener("DOMContentLoaded", () => {
-  new AddHabitForm()
-})
+});

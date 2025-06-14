@@ -1,3 +1,25 @@
+<?php
+session_start();
+require 'vendor/autoload.php';
+
+use Aws\DynamoDb\DynamoDbClient;
+
+$client = new DynamoDbClient([
+    'region'  => 'us-west-2',
+    'version' => 'latest',
+    'endpoint' => 'http://localhost:8000'
+]);
+
+// Verificar sesión
+if (!isset($_SESSION['email'])) {
+    header('Location: login.html');
+    exit();
+}
+
+// Obtener hábitos estándar
+$result = $client->scan(['TableName' => 'Habitos']);
+$habits = $result['Items'];
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,33 +28,45 @@
     <title>Nuevo Hábito - Seguimiento de Hábitos</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="assets/js/common.js"></script>
-    <script src="assets/js/auth.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="form-container">
             <div class="card">
-                <header class="header">
-                    <div class="header-content protected-header">
-                        <div class="header-with-back">
-                            <button class="btn-back" onclick="window.location.href='index.html'">
-                                <i class="fas fa-arrow-left"></i>
-                            </button>
-                            <div>
-                                <h1 class="card-title">
-                                    <i class="fas fa-plus text-blue"></i>
-                                    Nuevo Hábito
-                                </h1>
-                                <p class="card-description">Crea un nuevo hábito para comenzar tu seguimiento</p>
-                            </div>
+                <div class="card-header">
+                    <div class="header-with-back">
+                        <button class="btn-back" onclick="window.location.href='index.php'">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h1 class="card-title">
+                                <i class="fas fa-plus text-blue"></i>
+                                Nuevo Hábito
+                            </h1>
+                            <p class="card-description">Crea un nuevo hábito para comenzar tu seguimiento</p>
                         </div>
-                        <!-- El menú de usuario se insertará aquí dinámicamente -->
                     </div>
-                </header>
+                </div>
 
                 <div class="card-content">
                     <form id="habitForm" class="habit-form">
+                        <!-- Selección de hábito -->
+                        <div class="form-group">
+                            <label for="habitSelect" class="form-label">Selecciona un Hábito *</label>
+                            <select id="habitSelect" name="habitSelect" class="form-select" required>
+                                <option value="">-- Selecciona --</option>
+                                <?php foreach ($habits as $habit): ?>
+                                    <option value="<?= $habit['habitId']['S'] ?>"
+                                        data-type="<?= $habit['type']['S'] ?>"
+                                        <?= isset($habit['defaultTarget']) ? 'data-target="'.$habit['defaultTarget']['N'].'"' : '' ?>
+                                        <?= isset($habit['defaultUnit']) ? 'data-unit="'.$habit['defaultUnit']['S'].'"' : '' ?>>
+                                        <?= $habit['name']['S'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                                <option value="custom">-- Personalizado --</option>
+                            </select>
+                        </div>
+
                         <!-- Información Básica -->
                         <div class="form-section">
                             <h3 class="section-title">
@@ -49,6 +83,7 @@
                                     class="form-input" 
                                     placeholder="Ej: Beber agua, Hacer ejercicio, Leer..."
                                     required
+                                    disabled
                                 >
                             </div>
 
@@ -65,14 +100,10 @@
 
                             <div class="form-group">
                                 <label for="habitType" class="form-label">Tipo de Hábito *</label>
-                                <select id="habitType" name="habitType" class="form-select" required>
+                                <select id="habitType" name="habitType" class="form-select" required disabled>
                                     <option value="">Selecciona el tipo</option>
-                                    <option value="boolean">
-                                        🔵 Sí/No (Booleano)
-                                    </option>
-                                    <option value="numeric">
-                                        🟢 Numérico (Con meta)
-                                    </option>
+                                    <option value="boolean">🔵 Sí/No (Booleano)</option>
+                                    <option value="numeric">🟢 Numérico (Con meta)</option>
                                 </select>
                                 <p class="form-help" id="typeHelp">
                                     Selecciona un tipo para ver más información
@@ -140,7 +171,7 @@
                                 <i class="fas fa-plus"></i>
                                 Crear Hábito
                             </button>
-                            <button type="button" class="btn btn-secondary btn-full" onclick="window.location.href='index.html'">
+                            <button type="button" class="btn btn-secondary btn-full" onclick="window.location.href='index.php'">
                                 Cancelar
                             </button>
                         </div>
@@ -155,6 +186,8 @@
         <div class="spinner"></div>
     </div>
 
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/auth.js"></script>
     <script src="assets/js/add-habit.js"></script>
 </body>
 </html>
