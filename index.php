@@ -1,9 +1,37 @@
 <?php
 session_start();
+require 'vendor/autoload.php';
+
+use Aws\DynamoDb\DynamoDbClient;
 
 if (!isset($_SESSION['email'])) {
     header('Location: login.html');
     exit();
+}
+
+$client = new DynamoDbClient([
+    'region'  => 'us-west-2',
+    'version' => 'latest',
+    'endpoint' => 'http://localhost:8000'
+]);
+
+$userEmail = $_SESSION['email'];
+
+// Consulta usando el índice UserHabitsIndex
+$result = $client->query([
+    'TableName' => 'UsuarioHabitos',
+    'IndexName' => 'UserHabitsIndex',
+    'KeyConditionExpression' => 'userId = :userId',
+    'ExpressionAttributeValues' => [
+        ':userId' => ['S' => $userEmail]
+    ]
+]);
+
+$userHabits = $result['Items'] ?? [];
+
+// Función para obtener valores seguros de DynamoDB
+function getDynamoValue($item, $key, $type, $default = null) {
+    return $item[$key][$type] ?? $default;
 }
 ?>
 <!DOCTYPE html>
@@ -19,7 +47,7 @@ if (!isset($_SESSION['email'])) {
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <div class="header-content protected-header">
+            <div class="header-content">
                 <div class="header-info">
                     <h1 class="header-title">
                         <i class="fas fa-chart-line"></i>
@@ -27,17 +55,13 @@ if (!isset($_SESSION['email'])) {
                     </h1>
                     <p class="header-date" id="currentDate"></p>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-primary" onclick="window.location.href='add-habit.php'">
-                        <i class="fas fa-plus"></i>
-                        Nuevo Hábito
-                    </button>
-                    <!-- El menú de usuario se insertará aquí dinámicamente -->
-                </div>
+                <button class="btn btn-primary" onclick="window.location.href='add-habit.php'">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Hábito
+                </button>
             </div>
         </header>
 
-        <!-- Resto del contenido igual... -->
         <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card stat-blue">
@@ -45,7 +69,7 @@ if (!isset($_SESSION['email'])) {
                     <span class="stat-label">Hábitos Totales</span>
                     <i class="fas fa-target"></i>
                 </div>
-                <div class="stat-value" id="totalHabits">0</div>
+                <div class="stat-value" id="totalHabits"><?= count($userHabits) ?></div>
             </div>
 
             <div class="stat-card stat-green">
@@ -53,7 +77,7 @@ if (!isset($_SESSION['email'])) {
                     <span class="stat-label">Completados Hoy</span>
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="stat-value" id="completedToday">0/0</div>
+                <div class="stat-value" id="completedToday">0/<?= count($userHabits) ?></div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="completionProgress"></div>
                 </div>
@@ -86,7 +110,79 @@ if (!isset($_SESSION['email'])) {
                     </div>
                     <div class="card-content">
                         <div id="habitsContainer" class="habits-list">
-                            <!-- Los hábitos se cargarán aquí -->
+                            <?php if (empty($userHabits)): ?>
+                                <div class="empty-state">
+                                    <i class="fas fa-plus-circle" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                                    <h3 style="color: var(--gray-600); margin-bottom: 0.5rem;">No tienes hábitos aún</h3>
+                                    <p style="color: var(--gray-500); margin-bottom: 1rem;">Crea tu primer hábito para comenzar</p>
+                                    <a href="add-habit.php" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Crear Hábito
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <?php 
+                                // Obtener detalles de los hábitos desde la tabla Habitos
+                                $habitDetails = [];
+                                foreach ($userHabits as $userHabit) {
+                                    $habitId = $userHabit['habitId']['S'] ?? '';
+                                    if ($habitId) {
+                                        $result = $client->getItem([
+                                            'TableName' => 'Habitos',
+                                            'Key' => [
+                                                'habitId' => ['S' => $habitId]
+                                            ]
+                                        ]);
+                                        $habitDetails[$habitId] = $result['Item'] ?? [];
+                                    }
+                                }
+                                ?>
+                                
+                                <?php foreach ($userHabits as $userHabit): ?>
+                                    <?php
+                                    $habitId = $userHabit['habitId']['S'] ?? '';
+                                    $habit = $habitDetails[$habitId] ?? [];
+                                    
+                                    // Obtener valores del hábito base
+                                    $name = $habit['name']['S'] ?? 'Nuevo Hábito';
+                                    $type = $habit['type']['S'] ?? 'boolean';
+                                    $defaultTarget = $habit['defaultTarget']['N'] ?? 1;
+                                    $defaultUnit = $habit['defaultUnit']['S'] ?? '';
+                                    
+                                    // Obtener valores personalizados del usuario
+                                    $customTarget = $userHabit['customTarget']['N'] ?? $defaultTarget;
+                                    $customUnit = $userHabit['customUnit']['S'] ?? $defaultUnit;
+                                    $streak = $userHabit['streak']['N'] ?? 0;
+                                    $completed = false;
+                                    $todayProgress = 0; // Necesitarías un campo para trackear progreso diario
+                                    ?>
+                                    
+                                    <div class="habit-item" onclick="window.location.href='habit-detail.php?id=<?= htmlspecialchars($habitId) ?>'">
+                                        <div class="habit-info">
+                                            <i class="fas fa-<?= $completed ? 'check-circle' : 'circle' ?> habit-icon <?= $completed ? '' : 'incomplete' ?>"></i>
+                                            <div class="habit-details">
+                                                <h3><?= htmlspecialchars($name) ?></h3>
+                                                <div class="habit-meta">
+                                                    <span class="habit-badge">
+                                                        🔥 <?= $streak ?> días
+                                                    </span>
+                                                    <?php if ($type === 'numeric'): ?>
+                                                        <span class="habit-progress-text">
+                                                            <?= $todayProgress ?>/<?= $customTarget ?> <?= htmlspecialchars($customUnit) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php if ($type === 'numeric'): ?>
+                                            <div class="habit-progress">
+                                                <div class="progress-bar" style="width: 80px;">
+                                                    <div class="progress-fill" style="width: <?= ($todayProgress / $customTarget) * 100 ?>%"></div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
