@@ -18,16 +18,32 @@ $client = new DynamoDbClient([
 $userEmail = $_SESSION['email'];
 
 // Consulta usando el índice UserHabitsIndex
-$result = $client->query([
+$result = $client->scan([
     'TableName' => 'UsuarioHabitos',
-    'IndexName' => 'UserHabitsIndex',
-    'KeyConditionExpression' => 'userId = :userId',
+    'FilterExpression' => 'userId = :userId',
     'ExpressionAttributeValues' => [
         ':userId' => ['S' => $userEmail]
     ]
 ]);
 
-$userHabits = $result['Items'] ?? [];
+$userHabits = $client->query([
+    'TableName' => 'UsuarioHabitos',
+    'IndexName' => 'UserHabitsIndex',
+    'KeyConditionExpression' => 'userId = :userId',
+    'ExpressionAttributeValues' => [':userId' => ['S' => $userEmail]]
+])['Items'];
+
+// Obtener progreso de hoy
+$today = date('Y-m-d');
+$dailyProgress = $client->query([
+    'TableName' => 'HabitosSeguimiento',
+    'IndexName' => 'UserHabitDateIndex',
+    'KeyConditionExpression' => 'userId = :userId AND fecha = :fecha',
+    'ExpressionAttributeValues' => [
+        ':userId' => ['S' => $userEmail],
+        ':fecha' => ['S' => $today]
+    ]
+])['Items'];
 
 // Función para obtener valores seguros de DynamoDB
 function getDynamoValue($item, $key, $type, $default = null) {
@@ -156,7 +172,7 @@ function getDynamoValue($item, $key, $type, $default = null) {
                                     $todayProgress = 0; // Necesitarías un campo para trackear progreso diario
                                     ?>
                                     
-                                    <div class="habit-item" onclick="window.location.href='habit-detail.php?id=<?= htmlspecialchars($habitId) ?>'">
+                                    <div class="habit-item">
                                         <div class="habit-info">
                                             <i class="fas fa-<?= $completed ? 'check-circle' : 'circle' ?> habit-icon <?= $completed ? '' : 'incomplete' ?>"></i>
                                             <div class="habit-details">
@@ -204,6 +220,7 @@ function getDynamoValue($item, $key, $type, $default = null) {
                     </div>
                 </div>
 
+                <!--
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Progreso Semanal</h3>
@@ -212,6 +229,8 @@ function getDynamoValue($item, $key, $type, $default = null) {
                         <canvas id="weeklyChart" width="300" height="200"></canvas>
                     </div>
                 </div>
+                -->                            
+
             </div>
         </div>
     </div>
@@ -221,8 +240,8 @@ function getDynamoValue($item, $key, $type, $default = null) {
         <div class="spinner"></div>
     </div>
 
+    <script src="assets/js/dashboard.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script src="assets/js/dashboard.js"></script>
 </body>
 </html>
