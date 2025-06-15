@@ -58,6 +58,85 @@ function getDynamoValue($item, $key, $type, $default = null) {
     <title>Dashboard - Seguimiento de Hábitos</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Controles numéricos mejorados */
+        .numeric-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .btn-numeric {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-numeric:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-numeric:active {
+            transform: translateY(0);
+        }
+
+        .btn-numeric i {
+            font-size: 0.8rem;
+        }
+
+        /* Para hábitos numéricos específicamente */
+        .habit-item[data-habit-type="numeric"] {
+            padding: 1rem 1.5rem;
+            align-items: center;
+        }
+
+        .habit-item[data-habit-type="numeric"] .habit-info {
+            flex: 1;
+            min-width: 0; /* Permite que el texto se ajuste correctamente */
+        }
+
+        .habit-item[data-habit-type="numeric"] .habit-progress-text {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .habit-item[data-habit-type="numeric"] .habit-progress {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: 1rem;
+        }
+
+        .habit-item[data-habit-type="numeric"] .progress-bar {
+            width: 100px;
+            height: 6px;
+            background: var(--gray-200);
+            border-radius: 3px;
+        }
+
+        .habit-item[data-habit-type="numeric"] .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-green));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
