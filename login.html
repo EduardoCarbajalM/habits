@@ -1,15 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Seguimiento de Hábitos</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <form id="loginForm">
-        <input type="email" name="email" placeholder="Correo" required /><br />
-        <input type="password" name="password" placeholder="Contraseña" required /><br />
-        <button type="submit">Entrar</button>
-    </form>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h1 class="auth-title">Iniciar Sesión</h1>
+                <p class="auth-subtitle">Ingresa tus credenciales para continuar</p>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope"></i>
+                        Correo electrónico
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="Correo"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Contraseña
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Contraseña"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full auth-submit">
+                    Entrar
+                </button>
+
+                <div class="auth-links">
+                    <p>¿No tienes una cuenta? 
+                        <a href="register.html" class="auth-link">Regístrate aquí</a>
+                    </p>
+                    <a href="#" class="auth-link forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {

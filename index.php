@@ -150,6 +150,10 @@ function getDynamoValue($item, $key, $type, $default = null) {
                     </h1>
                     <p class="header-date" id="currentDate"></p>
                 </div>
+                <button class="btn btn-secondary" onclick="window.location.href='logout.php'">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar sesión
+                </button>
                 <button class="btn btn-primary" onclick="window.location.href='add-habit.php'">
                     <i class="fas fa-plus"></i>
                     Nuevo Hábito
